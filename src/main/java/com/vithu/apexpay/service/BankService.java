@@ -4,6 +4,7 @@ import com.vithu.apexpay.model.*;
 import com.vithu.apexpay.repository.AccountRepository;
 import com.vithu.apexpay.repository.TransactionRepository;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class BankService {
@@ -82,5 +83,38 @@ public class BankService {
 
     public List<Transaction> getTransactionsByAccount(String accountId) {
         return transactionRepository.findByAccount(accountId);
+    }
+
+    public List<Transaction> getTransactionsAbove(double amount){
+        return transactionRepository.
+                findAll().
+                stream().
+                filter(t->t.getAmount() > amount).
+                toList();
+    }
+
+    public long countDeposits(){
+        return transactionRepository.
+                findAll().
+                stream().
+                filter(t-> t instanceof DepositTransaction).
+                count();
+    }
+
+    public double getTotalDepositedAmount(){
+        return transactionRepository.
+                findAll().
+                stream().
+                filter(t-> t instanceof DepositTransaction).
+                mapToDouble(Transaction::getAmount).
+                reduce(0.0, Double::sum);
+    }
+
+    public Transaction getLargestTransaction(){
+        return transactionRepository.
+                findAll().
+                stream().
+                max(Comparator.comparing(Transaction::getAmount)).
+                orElse(null);
     }
 }
