@@ -1,5 +1,7 @@
 package com.vithu.apexpay.model;
 
+import com.vithu.apexpay.exception.InsufficientFundsException;
+
 public class Account {
     private String accountId;
     private String ownerName;
@@ -13,8 +15,7 @@ public class Account {
 
     public void deposit(double amount){
         if (amount <= 0) {
-            System.out.println("Deposit amount must be greater than zero.");
-            return;
+            throw new IllegalArgumentException("Deposit amount must be greater than zero.");
         }
 
         this.balance += amount;
@@ -23,13 +24,11 @@ public class Account {
 
     public void withdraw(double amount){
         if (amount <= 0) {
-            System.out.println("Withdrawal amount must be greater than zero.");
-            return;
+            throw new IllegalArgumentException("Withdrawal amount must be greater than zero.");
         }
 
-        if (this.balance<amount) {
-            System.out.println("Insufficient balance");
-            return;
+        if (this.balance < amount) {
+            throw new InsufficientFundsException(this.accountId, this.balance, amount);
         }
 
         this.balance -= amount;

@@ -2,48 +2,43 @@ package com.vithu.apexpay.repository;
 
 import com.vithu.apexpay.model.Account;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-public class AccountRepository {
-    private final Map<String, Account> accounts;
+public class AccountRepository implements BaseRepository<Account, String> {
 
-    public AccountRepository() {
-        accounts = new HashMap<>();
-    }
+    private final Map<String, Account> accounts = new HashMap<>();
 
-    public void createAccount(Account account){
-        if (accounts.containsKey(account.getAccountId())) {
-            System.out.printf("Account %s already exists%n", account.getAccountId());
-            return;
-        }
+    @Override
+    public Account save(Account account) {
         accounts.put(account.getAccountId(), account);
+        return account;
     }
 
-    public Account findAccount(String accountId){
-        return accounts.get(accountId);
+    @Override
+    public Optional<Account> findById(String accountId) {
+        return Optional.ofNullable(accounts.get(accountId));
     }
 
-    public void listAccounts(){
-        for(Account account:accounts.values()){
-            account.printAccount();
-            System.out.println();
-        }
+    @Override
+    public List<Account> findAll() {
+        return List.copyOf(accounts.values());
     }
 
-    public void deleteAccount(String accountId){
-        if (accounts.remove(accountId) == null) {
-            System.out.printf("Account %s does not exist%n", accountId);
-        }
-    }
-
-    public boolean exists(String accountId){
+    @Override
+    public boolean existsById(String accountId) {
         return accounts.containsKey(accountId);
     }
 
-    public Collection<Account> getAllAccounts(){
-        return accounts.values();
+    @Override
+    public void deleteById(String accountId) {
+        accounts.remove(accountId);
     }
 
+    /** Creates a new account only if one doesn't already exist. */
+    public Account createAccount(Account account) {
+        if (accounts.containsKey(account.getAccountId())) {
+            throw new IllegalArgumentException("Account already exists: " + account.getAccountId());
+        }
+        return save(account);
+    }
 }

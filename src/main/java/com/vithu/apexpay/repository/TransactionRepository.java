@@ -4,31 +4,43 @@ import com.vithu.apexpay.model.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class TransactionRepository {
+public class TransactionRepository implements BaseRepository<Transaction, String> {
 
-    private final List<Transaction> transactions;
+    private final List<Transaction> transactions = new ArrayList<>();
 
-    public TransactionRepository() {
-        transactions = new ArrayList<>();
-    }
-
-    public void save(Transaction transaction) {
+    @Override
+    public Transaction save(Transaction transaction) {
         transactions.add(transaction);
+        return transaction;
     }
 
-    public List<Transaction> findAll(){
-        return transactions;
+    @Override
+    public Optional<Transaction> findById(String id) {
+        return transactions.stream()
+                .filter(t -> t.getTransactionId().equals(id))
+                .findFirst();
     }
 
-    public List<Transaction> findByAccount(String accountId){
-        List<Transaction> result = new ArrayList<>();
-        for(Transaction transaction : transactions){
-            if(transaction.isAccountInvolved(accountId)){
-                result.add(transaction);
-            }
-        }
-        return result;
+    @Override
+    public List<Transaction> findAll() {
+        return List.copyOf(transactions);
     }
 
+    @Override
+    public boolean existsById(String id) {
+        return transactions.stream().anyMatch(t -> t.getTransactionId().equals(id));
+    }
+
+    @Override
+    public void deleteById(String id) {
+        transactions.removeIf(t -> t.getTransactionId().equals(id));
+    }
+
+    public List<Transaction> findByAccount(String accountId) {
+        return transactions.stream()
+                .filter(t -> t.isAccountInvolved(accountId))
+                .toList();
+    }
 }
